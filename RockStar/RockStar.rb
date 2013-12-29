@@ -9,7 +9,7 @@ class RockStar
 
         item_price.sort!
 
-        obj = SimpleSearch.new
+        obj = Search.new
         obj.setTarget(item_price)
 
         input[1].to_i.times{
@@ -21,7 +21,7 @@ class RockStar
     end
 end
 
-class SimpleSearch
+class Search
     @max
     @set_point
     @target
@@ -38,16 +38,21 @@ class SimpleSearch
     end
 
     def getOptimumMax()
-        before_max = @target_size - 1
+        binary = BinarySearch.new
+        binary.setTarget(@target)
+        binary.setPoint(@set_point)
+
+        before_max = binary.getLocalMax(0, 1, @target_size-1, 0)
+
         # for i=0; i < @target_size - 2; i++
         (@target_size - 2).times{|i|
-            if i >= (before_max - 1)
+            before_max = getLocalMax(i, before_max)
+
+            if @max == @set_point
                 return @max
             end
 
-            #i, last_max
-            before_max = getLocalMax(i, before_max)
-            if @max == @set_point
+            if i >= (before_max - 1)
                 return @max
             end
         }
@@ -72,6 +77,50 @@ class SimpleSearch
             end
         }
         return i + 1
+    end
+end
+
+class BinarySearch
+    @max
+    @set_point
+    @target
+    @target_size
+
+    def setPoint(set_point)
+        @max = 0
+        @set_point = set_point
+    end
+
+    def setTarget(target)
+        @target      = target
+        @target_size = target.size
+    end
+
+    def getLocalMax(i, forward, backward, depth)
+        middle = (forward + backward)/2
+        middle.to_i
+
+        sum = @target[i] + @target[middle]
+
+        # 終了条件
+        # 再帰終わり
+        if (forward == backward || depth > 20)
+            if sum >= @set_point
+                return middle
+            else
+                return backward
+            end
+        end
+
+        # 再帰処理
+        if (sum > @set_point)
+            depth = depth + 1
+            return getLocalMax(i, forward, middle-1, depth)
+        else
+            depth = depth + 1
+            @max = sum
+            return getLocalMax(i, middle+1, backward, depth)
+        end
     end
 end
 
