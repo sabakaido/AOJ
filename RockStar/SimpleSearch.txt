@@ -1,0 +1,16 @@
+
+getLocalMax(i,before_max)
+if (i == before_max - 1)
+    return before_max
+
+if (@target[i] + @target[before_max] > @set_point)
+    before_max = getLocalMax(i, before_max-1)
+    return before_max
+else
+    @max = @target[i] + @target[before_max]
+    return before_max
+
+
+
+
+
